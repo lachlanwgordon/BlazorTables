@@ -20,10 +20,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+
 var connectionString = builder.Configuration.GetValue<string>("ConnectionString");
-
-builder.Services.AddTransient<ITableService<WeatherForecast>>(_ => new TableService<WeatherForecast>(new TableClient(connectionString, nameof(WeatherForecast))));
-
+builder.Services.AddSingleton<TableClient<WeatherForecastEntity>>(new TableClient<WeatherForecastEntity>(connectionString));
+builder.Services.AddTransient<ITableService<WeatherForecastEntity>, TableService<WeatherForecastEntity>>();
+builder.Services.AddSingleton<TableClient<PersonEntity>>(new TableClient<PersonEntity>(connectionString));
+builder.Services.AddTransient<ITableService<PersonEntity>, TableService<PersonEntity>>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

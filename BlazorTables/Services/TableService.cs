@@ -2,7 +2,7 @@
 
 namespace BlazorTables.Services
 {
-    public interface ITableService<T>
+    public interface ITableService<T> where T : class , ITableEntity, new()
     {
         Task<List<T>> GetAllAsync();
         Task SaveAsync(T item);
@@ -12,7 +12,7 @@ namespace BlazorTables.Services
     {
         private TableClient tableClient;
 
-        public TableService(TableClient tableClient)
+        public TableService(TableClient<T> tableClient)
         {
             this.tableClient = tableClient;
             tableClient.CreateIfNotExists();
@@ -28,7 +28,6 @@ namespace BlazorTables.Services
         public async Task SaveAsync(T item)
         {
             await tableClient.UpsertEntityAsync(item);
-
         }
     }
 }

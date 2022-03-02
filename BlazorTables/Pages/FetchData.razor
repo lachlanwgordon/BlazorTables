@@ -14,7 +14,7 @@
 
 @if (forecasts == null)
 {
-    <p><em>Loading...</em></p>
+    <p><em>Loading weather ...</em></p>
 }
 else
 {
@@ -41,25 +41,67 @@ else
     </table>
 }
 
+@if (people == null)
+{
+    <p><em>Loading people...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var person in people)
+            {
+                <tr>
+
+                    <td>@person.FirstName</td>
+                    <td>@person.LastName</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
 @code {
-    [Inject] ITableService<WeatherForecast> tableService { get; set; }
-    private WeatherForecast[]? forecasts;
+    [Inject] ITableService<WeatherForecastEntity> weatherForecastService { get; set; }
+    [Inject] ITableService<PersonEntity> personService { get; set; }
+    private List<WeatherForecastEntity> forecasts;
+    private List<PersonEntity> people;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        await LoadData();
     }
 
     async Task CreateClicked()
     {
-        var weather = new WeatherForecast
-            {
-                Date = DateTime.UtcNow.Date,
-                Summary = "This is a test",
-                TemperatureC = 1000,
+        var weather = new WeatherForecastEntity
+        {
+            Date = DateTime.UtcNow.Date,
+            Summary = "This is a test",
+            TemperatureC = 1000,
 
-            };
-        await tableService.SaveAsync(weather);
-        forecasts = (await tableService.GetAllAsync()).ToArray();
+        };
+        await weatherForecastService.SaveAsync(weather);
+        var person = new PersonEntity
+        {
+            FirstName = "TestPerson",
+            LastName = "Test last name",
+
+        };
+        await personService.SaveAsync(person);
+
+        await LoadData();
+    }
+
+    async Task LoadData()
+    {
+        forecasts = await weatherForecastService.GetAllAsync();
+        people = await personService.GetAllAsync();
     }
 }
